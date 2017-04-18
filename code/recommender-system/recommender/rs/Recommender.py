@@ -42,7 +42,7 @@ class Recommender:
         df_similarities = pd.DataFrame(index=[u.id for u in self.users], columns=[u.id for u in self.users])
         print("Calculating Similarities")
         num_rows = len(self.users)
-        for index, user_x in enumerate(self.users):
+        for idx, user_x in enumerate(self.users):
             for idy, user_y in enumerate(self.users):
                 # Similarity has not been found yet
                 if pd.isnull(df_similarities[user_x.id][user_y.id]):
@@ -63,7 +63,7 @@ class Recommender:
                             df_similarities.set_value(user_x.id, user_y.id, pearson[0])
                             df_similarities.set_value(user_y.id, user_x.id, pearson[0])
 
-            progress = (float(index) / float(num_rows)) * 100
+            progress = (float(idx) / float(num_rows)) * 100
             sys.stdout.write("Progress: %f%%    \r" % progress)
             sys.stdout.flush()
         self.users_ratings_similarities = df_similarities
@@ -79,6 +79,7 @@ class Recommender:
             # Remove users that don't share ratings
             df_similar_users = self.users_ratings_similarities[user.id]
             df_similar_users = df_similar_users.dropna()
+            user_movies = [rating.movie_id for rating in user.ratings]
             # Other users ratings, positive similarity -> weight what else they have seen
             for idx, sim in df_similar_users.iteritems():
                 if sim > 0:
@@ -88,7 +89,7 @@ class Recommender:
                         exit(1)
                     for rating in target_user.ratings:
                         # user has not seen this movie -> calculate score
-                        if rating.movie_id not in user.ratings:
+                        if rating.movie_id not in user_movies:
                             # Similarity and Score
                             weighted_sum.setdefault(rating.movie_id, 0)
                             weighted_sum[rating.movie_id] += (rating.value * sim)
