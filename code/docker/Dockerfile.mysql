@@ -1,0 +1,17 @@
+FROM mysql/mysql-server:latest
+
+# setup mysql, allow remote access and create user
+RUN sed -i -e"s/^bind-address\s*=\s*127.0.0.1/bind-address = 0.0.0.0/" /etc/my.cnf
+
+ADD create_database.sql /docker-entrypoint-initdb.d/
+ADD create_user.sql /docker-entrypoint-initdb.d/
+
+#ADD set-mysql-password.sh /tmp/set-mysql-password.sh
+#RUN /bin/sh /tmp/set-mysql-password.sh
+
+# set root password
+#RUN echo "root:root" | chpasswd
+
+# clean packages
+#RUN apt-get clean
+#RUN rm -rf /var/cache/apt/archives/* /var/lib/apt/lists/*

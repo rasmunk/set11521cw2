@@ -1,0 +1,9 @@
+#!/usr/bin/env python
+import recommender
+
+def setup():
+    recommender.Database.initialize()
+    recommender.Database.setup()
+
+if __name__ == "__main__":
+    setup()

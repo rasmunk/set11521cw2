@@ -1,0 +1,49 @@
+FROM debian:latest
+RUN update=1; while test $update -ne 0; do apt-get update --fix-missing; update=$? ; done \
+    && update=1; while test $update -ne 0; do apt-get install --no-install-recommends -y \
+    python \
+    g++ \
+    git \
+    ca-certificates \
+    ssh-client \
+    htop \
+    python-setuptools \
+    python-dev \
+    libmysqlclient-dev \
+    mysql-client \
+    unzip \
+    wget \
+    supervisor \
+    nano; \
+    update=$? ; done \
+    && apt-get clean \
+    && rm -r /var/lib/apt/lists/*
+
+## Setup Database and python connection
+RUN cd /opt \
+    && easy_install pip \
+    && easy_install SQLAlchemy \
+    && easy_install MySQL-python \
+    && easy_install scipy \
+    && pip install pandas \
+    && mkdir -p /var/log/supervisor
+
+## insert supervisord config -> handles the startup procedure for the image
+COPY supervisord.conf /etc/supervisor/conf.d/supervisord.conf
+
+#ENV DATASET ml-20m
+ENV DATASET ml-latest-small
+# Download MovieLens dataset
+RUN cd /opt \
+    && wget "http://files.grouplens.org/datasets/movielens/${DATASET}.zip" \
+    && unzip ${DATASET}.zip \
+    && rm -r ${DATASET}.zip
+
+## Setup the recommender system
+# Requires that there is a mysql database server running in the network
+RUN cd /opt \
+    && git clone -b master --single-branch https://github.com/rasmunk/set11521cw2.git \
+    && cd /opt/set11521cw2/code/recommender-system \
+    && python setup.py install
+
+CMD ["/usr/bin/supervisord"]
