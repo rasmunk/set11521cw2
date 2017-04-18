@@ -20,12 +20,13 @@ RUN update=1; while test $update -ne 0; do apt-get update --fix-missing; update=
     && rm -r /var/lib/apt/lists/*
 
 ## Setup Database and python connection
+## Also setup required library support for the recommendation system
 RUN cd /opt \
     && easy_install pip \
     && easy_install SQLAlchemy \
     && easy_install MySQL-python \
-    && easy_install scipy \
-    && pip install pandas \
+    && pip install --upgrade pip \
+    && pip install --user numpy scipy matplotlib ipython jupyter pandas sympy nose \
     && mkdir -p /var/log/supervisor
 
 ## insert supervisord config -> handles the startup procedure for the image
