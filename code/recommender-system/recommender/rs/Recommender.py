@@ -101,7 +101,7 @@ class Recommender:
             rankings = [(w_score / similarity_sum[item], item) for item, w_score in weighted_sum.items()]
             rankings.sort()
             rankings.reverse()
-            self.recoms[user] = rankings[:15]
+            self.recoms[user] = rankings
 
             progress = (float(index) / float(num_rows)) * 100
             sys.stdout.write("Progress: %f%%    \r" % progress)
@@ -111,12 +111,19 @@ class Recommender:
         print("Saving Recommendations")
         num_rows = len(self.recoms)
         index = 0
+        estimated_rating = 0
+        movie_id = 1
         recommendations = []
         for user, recoms in self.recoms.iteritems():
+            ## Persist 20 ratings for each user.
+            amount_recoms = 0
             for item in recoms:
-                if Database.session.query(Recommendation).filter(Recommendation.user_id == user.id).filter(Recommendation.movie_id == item[1]).first() is None:
-                    recom = Recommendation(user_id=user.id, movie_id=item[1], estimated_rating=item[0])
+                if Database.session.query(Recommendation).filter(Recommendation.user_id == user.id).filter(Recommendation.movie_id == item[movie_id]).first() is None:
+                    recom = Recommendation(user_id=user.id, movie_id=item[movie_id], estimated_rating=item[estimated_rating])
                     recommendations.append(recom)
+                    amount_recoms += 1
+                    if amount_recoms % 20 == 0:
+                        break
             progress = (float(index) / float(num_rows)) * 100
             sys.stdout.write("Progress: %f%%    \r" % progress)
             sys.stdout.flush()
