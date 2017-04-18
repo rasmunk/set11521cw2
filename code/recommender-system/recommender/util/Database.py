@@ -115,10 +115,8 @@ class Database:
 
 
                 ## Create new rating
-                rating = Rating(value=row['rating'], timestamp=row['timestamp'], user_id=user.id, movie_id=movie.movieId)
+                rating = Rating(value=row['rating'], timestamp=row['timestamp'], user_id=user.id, movie_id=movie.id)
                 ratings.append(rating)
-                #movie.ratings.append(rating)
-                #user.ratings.append(rating)
                 progress = (float(index) / float(num_rows)) * 100
                 sys.stdout.write("Progress: %f%%    \r" % progress)
                 sys.stdout.flush()
