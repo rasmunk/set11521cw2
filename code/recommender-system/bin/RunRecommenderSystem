@@ -1,17 +1,31 @@
 #!/usr/bin/env python
 import recommender
 import argparse
+import tests
+
+# TODO -> switch over to item-item similarity recommendations
+# TODO -> make the recommendation process a background task
+# TODO -> dynamic menu generation
 
 parser = argparse.ArgumentParser(description='Movie Recommendation System', fromfile_prefix_chars='@')
-parser.add_argument('-sr', '--skip-recommendation', action='store_true', help="Should the recommendation engine be skipped")
+parser.add_argument('-sr', '--skip-recommendation', action='store_true',
+                    help="Should the recommendation engine be skipped")
 parser.add_argument('-sm', '--skip-menu', action='store_true', help="Should the menu be skipped")
+parser.add_argument('-sd', '--skip-datasetup', action='store_true', help="Should the database setup be skipped")
+parser.add_argument('-nr', '--number-runs', action='store', help="Number of runs", default=1)
+parser.add_argument('-t', '--test-recommendations', action='store_true', help="Run Recommendation Tests")
 args = parser.parse_args()
-
 
 if __name__ == "__main__":
     recommender.Database.initialize()
-    system = recommender.RecommenderSystem()
-    if args.skip_recommendation is not True:
-        system.start_recommender()
-    if args.skip_menu is not True:
-        system.start_menu()
+
+    if args.test_recommendations is not True:
+        system = recommender.RecommenderSystem()
+        if args.skip_recommendation is not True:
+            system.start_recommender()
+        if args.skip_menu is not True:
+            system.start_menu()
+    else:
+        tester = tests.TestRecommendations()
+        for run in range(int(args.number_runs)):
+            tester.test_recommendations()

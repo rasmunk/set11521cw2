@@ -5,6 +5,19 @@
 \usepackage[margin=0.7in]{geometry}
 \usepackage{multicol}
 \usepackage{enumitem}
+\usepackage{algorithm}
+\usepackage{algorithmic}
+
+\newlength\myindent
+\setlength\myindent{2em}
+\newcommand\bindent{%
+	\begingroup
+	\setlength{\itemindent}{\myindent}
+	\addtolength{\algorithmicindent}{\myindent}
+}
+\newcommand\eindent{\endgroup}
+
+
 
 \usepackage{graphicx}
 \graphicspath{{images/}}

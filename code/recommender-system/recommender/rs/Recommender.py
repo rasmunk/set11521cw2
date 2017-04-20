@@ -15,14 +15,14 @@ class Recommender:
     movies = None
     recoms = None
 
-    def initialize(self):
+    def __init__(self):
         Database.initialize()
         self.users = Database.session.query(User).all()
         self.ratings = Database.session.query(Rating).all()
         self.movies = Database.session.query(Movie).all()
         self.recoms = {}
 
-    ## Calculate recommendations for each user
+    # Calculate recommendations for each user
     def start(self):
         self.collaborative_filtering()
 
@@ -38,7 +38,6 @@ class Recommender:
         for idx, user_x in enumerate(self.users):
             df_movies_rated[user_x.id] = pd.Series([rating.movie_id for rating in user_x.ratings])
 
-        print("Datatype: " + str(type(df_movies_rated[1][0])))
         df_similarities = pd.DataFrame(index=[u.id for u in self.users], columns=[u.id for u in self.users])
         print("Calculating Similarities")
         num_rows = len(self.users)
@@ -50,8 +49,8 @@ class Recommender:
                     if user_x.id != user_y.id:
                         intersection = pd.Series(
                             list(set(df_movies_rated[user_x.id]) & set(df_movies_rated[user_y.id])))
-                        # Users share movie ratings, calc similarity
-                        if len(intersection) > 0:
+                        # Users share atleast 5, calc similarity
+                        if len(intersection) >= 5:
                             # Convert to integers -> make comparable
                             intersection = map(int, intersection)
 
@@ -67,7 +66,6 @@ class Recommender:
             sys.stdout.write("Progress: %f%%    \r" % progress)
             sys.stdout.flush()
         self.users_ratings_similarities = df_similarities
-
 
     # Programming collective chapter 2
     def recommendations(self):
@@ -101,7 +99,7 @@ class Recommender:
             rankings = [(w_score / similarity_sum[item], item) for item, w_score in weighted_sum.items()]
             rankings.sort()
             rankings.reverse()
-            self.recoms[user] = rankings
+            self.recoms[user] = rankings[:100]
 
             progress = (float(index) / float(num_rows)) * 100
             sys.stdout.write("Progress: %f%%    \r" % progress)
@@ -115,11 +113,13 @@ class Recommender:
         movie_id = 1
         recommendations = []
         for user, recoms in self.recoms.iteritems():
-            ## Persist 20 ratings for each user.
+            # Persist 20 ratings for each user.
             amount_recoms = 0
             for item in recoms:
-                if Database.session.query(Recommendation).filter(Recommendation.user_id == user.id).filter(Recommendation.movie_id == item[movie_id]).first() is None:
-                    recom = Recommendation(user_id=user.id, movie_id=item[movie_id], estimated_rating=item[estimated_rating])
+                if Database.session.query(Recommendation).filter(Recommendation.user_id == user.id).filter(
+                                Recommendation.movie_id == item[movie_id]).first() is None:
+                    recom = Recommendation(user_id=user.id, movie_id=item[movie_id],
+                                           estimated_rating=item[estimated_rating])
                     recommendations.append(recom)
                     amount_recoms += 1
                     if amount_recoms % 20 == 0:
@@ -130,3 +130,4 @@ class Recommender:
             index += 1
 
         Database.session.bulk_save_objects(recommendations)
+        Database.session.commit()

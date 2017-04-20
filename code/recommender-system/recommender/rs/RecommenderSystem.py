@@ -10,7 +10,6 @@ class RecommenderSystem:
         self.menu = Menu()
 
     def start_recommender(self):
-        self.recommender.initialize()
         self.recommender.start()
 
     def start_menu(self):

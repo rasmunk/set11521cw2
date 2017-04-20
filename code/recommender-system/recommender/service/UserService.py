@@ -9,10 +9,10 @@ import time
 
 class UserService:
     @staticmethod
-    def get_user(id):
+    def get_user(user_id):
         user = None
         try:
-            user = Database.session.User.query.get(id)
+            user = Database.session.User.query.get(user_id)
         except Exception as e:
             print("Failed to get user: " + str(id), e)
         finally:

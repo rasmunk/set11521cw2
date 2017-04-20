@@ -1,18 +1,110 @@
-\section{Introduction}
-
-
-
-
 \section{Approach}
+The user-based collaborative filtering approach was selected to make movie recommendation for a set of users. This meant that recommendations for an individual user would be based on what similar users have liked that the current user have not yet rated/seen. This is based on the theory that if users have similar taste what that other user also likes should also be applicable to the first user. The key here lies in how is similarity determined, in this instance the Pearson correlation coefficient measurement was selected as the primary method to evaluate similarity, it measures similarity of users by making a linear correlation between what user x and y have rated in terms the score they applied to a set that contains the intersection of movies rated by x and y. The inspiration for this approach was drawn from \cite{Lead} where this was applied in conjunction with a weighted similarity score that makes sure that users you agree most with are rated higher in terms of movie recommendations.
 
-
+The technology itself i.e. collaborative filtering was selected based on multiple factors. This included the suggestions made by \cite{Burke2011} about movie recommendation systems and their domain features including the low risk value of the recommendation, the homogeneous nature of the system and the stability in terms of preference that users have in terms of how much can you rely on previous received information e.g. user's rating history to make future predictions. In terms of technology variation, collaborative filtering provides multiple approaches, e.g. user-based or item based filtering. Both of these have merits, the user-based approach increases in computational cost as the number of users increases. The item based however however grows whenever new items are added. However in terms of selecting the most appropriate for future users studies show "TODO REFERENCE" that as the dataset increases the number of users tend to out grow the number of items. In this instance the number of users/items is stable since it is not a live system a choice was made to use the user based approach since the dataset contains 671 users and 9125 movies.
 
 \section{Required Knowledge}
 
+The knowledge required for this approach to work include user histories of movie ratings from which user similarity can be based upon. To achieve this a number of public available datasets containing user movie ratings were evaluated. This included the Netflix Prize dataset \cite{bennett0netflix} , the IMDb academic dataset \cite{IMDb2017} or the MovieLens \cite{Harper2015} dataset. From these the MovieLens 100K dataset was chosen as being the most appropriate. The reason for this was that the original Netflix dataset only contained data about when a user rated a movie and not how it was rated. The reason for this was that it was the task for the algorithm to predict the number of reviews a movie would receive in 2006.  Similar to this the IMDb dataset contained rating of movie's but they weren't tied to any users, meaning that user-based collaborative filtering isn't feasible. The MovieLens dataset on the other hand doesn't have any of these missing features, meaning that it contained users which had committed at least 20 ratings with a value between 1.0 and 5.0 to different movies. Because of this the MovieLens dataset was selected as the most appropriate to develop this movie recommendation system.
 
+Note. it was discovered later in the process that there has been developed an altered version of the Netflix dataset which provides actual ratings of movies \cite{Netflix2009}, however this was discovered after the MovieLens dataset had been applied.
 
 \section{Algorithm}
+	The pseudo code for the similarity and recommendation functions can be seen in \ref{algorithm:sim_pearsons} and \ref{algorithm:sim_pearsons}. The similarity function is used calculate how similar every user is to all the others based on their Pearson correlation coefficient in terms of how they rated a shared set of movies. When a shared set of movies have been found between two users the correlation is calculated by basically drawing a line through the rating values of the shared movies. If two users agree on the rating of their shared set of movies the result would be a positive correlation between them, meaning that they are expected to have similar taste. After the similarity has been calculated the recommendation function is run \ref{algorithm:recommendations}. This function finds movie recommendations for each user by evaluating ranking the unseen movies that similar users have seen. The rating proposed for unseen movies are adopted in proportion to how similar their taste is to the current user, i.e. \textit{weighted\_sum[rating.movie\_id] + = [rating.value * similarity]}. After this has been completed for every user the proposed movies are ranked based on their estimated rating.
+	
+	Upon completion the correlation is stored in the user/user \textit{df\_similarities} matrix and later persisted in the underlying database for later retrieval when a user requests movie recommendations.
 
+	\begin{algorithm}[H]
+		\renewcommand\thealgorithm{}
+		\caption{Recommender.sim\_pearsons()}
+		\label{algorithm:sim_pearsons}
+		\begin{algorithmic}
+			\STATE $df\_movies\_rated[user] \leftarrow Series containing movies rated by user$
+			\STATE $df\_similarities \leftarrow DataFrame consisting of user Id's on the x and y axis$
+			
+			\FORALL{user\_x in users}
+				\FORALL{user\_y in users}
+					\IF{df\_similarities[user\_x][user\_y] is null \AND user\_x != user\_y}
+						\STATE $intersection \leftarrow$ shared movies between user\_x and user\_y
+						\IF{$intersection \geq 5$}
+							\STATE $x\_ratings \leftarrow$ list of user\_x rating values
+							\STATE $y\_ratings \leftarrow$ list of user\_y rating values
+							\STATE $pearson \leftarrow personr(x\_ratings, y\_ratings)$
+							\STATE $df\_similarities[user\_x][user\_y] \leftarrow pearson$
+							\STATE $df\_similarities[user\_y][user\_x] \leftarrow pearson$
+						\ENDIF
+					\ENDIF
+				\ENDFOR
+			\ENDFOR
+			
+			\STATE $Recommender.users\_ratings\_similarities \leftarrow df\_similarities$
+		\end{algorithmic}
+	\end{algorithm}
+
+	\begin{algorithm}[H]
+		\caption{Recommender.recommendations()}
+		\label{algorithm:recommendations}
+		\begin{algorithmic}
+			\STATE $weighted\_sum \leftarrow \{\}$
+			\STATE $similarity\_sum \leftarrow \{\}$
+			\STATE $num\_rows \leftarrow length(users)$
+			
+			\FORALL{user in users}
+				\STATE $df\_similar\_users \leftarrow Recommender.users\_ratings\_similarities[user.id]$
+				\STATE $df\_similar\_users \leftarrow $ Remove users that aren't similar.
+				\STATE $user\_movies \leftarrow $ user rated movie ids
+				\FORALL{target\_user\_id, similarity in df\_similar\_users}
+					\IF{$similarity \textgreater 0$}
+						\FORALL{rating in users[target\_user\_id].ratings}
+							\IF{rating.movie\_id not in user\_movies}
+								\STATE $weighted\_sum.setdefault(rating.movie, 0) $
+								\STATE $weighted\_sum[rating.movie\_id]\  + =\ (rating.value * similarity)$
+								
+								\STATE $similarity\_sum.setdefault(rating.movie\_id, 0)$
+								\STATE $similarity\_sum[rating.movie_id]\ + =\ similarity$
+							\ENDIF
+						\ENDFOR
+					\ENDIF
+				\ENDFOR
+			
+				\STATE Rank the ratings, users who agree alot with the current user will have their ratings affect the final score the most
+				\STATE $rankings \leftarrow [(w\_score / similarity\_sum[movie\_id], movie\_id)$
+				\bindent
+				    \STATE $for\ movie\_id,\ w\_score\ in\ weighted\_sum.items()]$  
+				\eindent
+				\STATE $rankings.sort()$
+				\STATE $rankings.reverse()$
+				\STATE $Recommender.recoms[user] \leftarrow rankings$
+			\ENDFOR
+		\end{algorithmic}
+	\end{algorithm}
 
 
 \section{Evaluation \& Reflection}
+
+To evaluate whether the recommendations made by the correlation filter is actually usable to the users a series of offline tests were conducted. This included randomly splitting the set of user ratings into a training and testing set in of either 60/40 or 80/20 distribution. This was then used to apply the training dataset to the recommendation engine to evaluate whether the engine would be accurately be able to predict the rating contained in the test data Beyond this the amount of minimum shared rated movies were also varied between either above 0 or equal to and above 5. The hypothesis was that by sharing more movie ratings the algorithm would be able to better predict the missing ratings.
+
+To evaluate the precision of the recommendation predictions the root mean squared error(RMSE) would be calculated to determine the accuracy of the predicted ratings. The reason for this was that as described in \cite{Schafer2007} the RMSE emphasizes large errors and penalizes the performance value by how far each individual prediction is from the true value/rating.
+
+The result of the testing can be seen in \ref{table:results}. The results are from running the recommendation test 20 times for each configuration on the MovieLens 100K dataset and extracting the top 100 recommendations. The reason for multiple runs is that because the testing data is a randomly selected sample it poses the probability that a single run could contain a "lucky" sample. i.e a set of users that have rated more movies than the average.
+ As \ref{table:results} shows the mean RMSE improves when the number of required shared movies is increased. It also shows that in terms of the significant difference in the population distribution i.e. (\textit{p two-tail = 0,00004}) for the 80/20 configurations and (\textit{p two-tail = $4.43e-13$}) for the 60/40 configurations. However, when looking the percentage between the training/test distributions it indicates no significant difference in the achieved predictions with (\textit{p two-tail = $0.58$}) between the 60/40 1 or more shared movies vs the 80/20's configuration or (\textit{p two-tail = $0.13$}) with 60/40 5 or more shared movies vs the 80/20's RMSE.
+
+\begin{table}[H]
+	\caption{\label{table} Testing Results}
+	\centering
+	\label{table:results}
+	\begin{tabular}{c c c c}
+		\hline
+		Train \% & Test \% & Shared Movies & Mean RMSE  \\
+		\hline
+		60 & 40 & 1 or more &  1,58840 \\
+		60 & 40 & 5 or more &  1,23029 \\
+		80 & 20 & 1 or more &  1,54424 \\
+		80 & 20 & 5 or more &  1,29246 \\
+		\hline
+	\end{tabular}
+\end{table} 
+
+Reflecting on these results it shows that in terms of the configuration parameters for the user-based collaborative filtering approach using the Pearson correlation coefficient similarity function the results supports the proposed hypothesis. I.e that an increase in shared movies lowers the RMSE which means that the prediction ability of the system improves. Whether the recommended movies are actually engaging and interesting to the users is another matter and can't be claimed based on these results.
+
+In terms of overall drawbacks of the user-based approach, whenever a user adds a new rating that users recommendations has to be recalculated. This could pose a significant query time whenever a user attempts to retrieve recommendations To avoid this the recommendation engine was implemented as a background process that triggers every 30 minutes, however this does mean that a user can receive legacy recommendations until the next update has run. To counter this the item-based approach does seem preferable in that the similarity of each item can be precomputed, hence whenever a user commits a new rating the recommendations can be updated subsequently. 

@@ -11,14 +11,13 @@ from recommender.util.Search import binary_search
 
 
 class Database:
-
     session = None
 
     @staticmethod
     def initialize():
         if Database.session is None:
             database_engine = create_engine('mysql+mysqldb://foo:Passw0rd!@172.18.0.2/recommendation')
-            database_engine.echo = True
+            database_engine.echo = False
 
             ## Create model tables
             Base.metadata.create_all(database_engine)
@@ -59,7 +58,7 @@ class Database:
                 movie = Movie(movieId=row['movieId'], title=row['title'])
                 movie.genres = list_genres
                 Database.session.add(movie)
-                progress = (float(index) / float(num_rows))*100
+                progress = (float(index) / float(num_rows)) * 100
                 sys.stdout.write("Progress: %f%%    \r" % progress)
                 sys.stdout.flush()
 
@@ -97,7 +96,6 @@ class Database:
             Database.session.commit()
             users = Database.session.query(User).all()
 
-
             print("Configuring Ratings")
             ratings = []
             for index, row in data.iterrows():
@@ -112,7 +110,6 @@ class Database:
                 if movie.movieId != row['movieId']:
                     print("Movie index didn't match up")
                     exit(1)
-
 
                 ## Create new rating
                 rating = Rating(value=row['rating'], timestamp=row['timestamp'], user_id=user.id, movie_id=movie.id)

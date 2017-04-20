@@ -26,7 +26,7 @@ RUN cd /opt \
     && easy_install SQLAlchemy \
     && easy_install MySQL-python \
     && pip install --upgrade pip \
-    && pip install --user numpy scipy matplotlib ipython jupyter pandas sympy nose \
+    && pip install --user numpy scipy matplotlib ipython jupyter pandas sympy nose sklearn \
     && mkdir -p /var/log/supervisor
 
 ## insert supervisord config -> handles the startup procedure for the image
@@ -43,8 +43,9 @@ RUN cd /opt \
 ## Setup the recommender system
 # Requires that there is a mysql database server running in the network
 RUN cd /opt \
-    && git clone -b master --single-branch https://github.com/rasmunk/set11521cw2.git \
+    && git clone -b development --single-branch https://github.com/rasmunk/set11521cw2.git \
     && cd /opt/set11521cw2/code/recommender-system \
-    && python setup.py install
+    && python setup.py install \
+    && rm -r /opt/set11521cw2
 
 CMD ["/usr/bin/supervisord"]

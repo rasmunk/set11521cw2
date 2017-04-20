@@ -1,0 +1,36 @@
+\begin{thebibliography}{1}
+
+\bibitem{bennett0netflix}
+James Bennett and Stan Lanning.
+\newblock {The Netflix Prizes}.
+
+\bibitem{Burke2011}
+Robin Burke and Maryam Ramezani.
+\newblock {Matching Recommendation Technologies and Domains}.
+\newblock {\em Recommender Systems Handbook}, 54:367--386, 2011.
+
+\bibitem{Harper2015}
+F~Maxwell Harper and Joseph~A Konstan.
+\newblock {The MovieLens Datasets : History and Context}.
+\newblock 5(4):1--19, 2015.
+
+\bibitem{IMDb2017}
+IMDb.
+\newblock {IMDb dataset}, 2017.
+
+\bibitem{Netflix2009}
+Netflix.
+\newblock {Netflix Prize Data Set}.
+\newblock 2009.
+
+\bibitem{Schafer2007}
+J~Ben Schafer, D~Frankowski, Jon Herlocker, and S~Sen.
+\newblock {Collaborative Filtering Recommender Systems}.
+\newblock {\em International Journal of Electronic Business}, 2(1):77, 2007.
+
+\bibitem{Lead}
+Toby Segaran.
+\newblock {\em {Praise for Programming Collective Intelligence}}.
+\newblock 2007.
+
+\end{thebibliography}

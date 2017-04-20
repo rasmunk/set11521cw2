@@ -42,7 +42,6 @@ class Menu:
         print("YOUR ID IS: " + str(Menu.current_user.userId))
         print(67 * "-")
 
-
     @staticmethod
     def print_select_specific_user():
         print(30 * "-", "SELECT USER", 30 * "-")
@@ -73,7 +72,6 @@ class Menu:
         selected_movies = []
         num_movies = len(movies)
         if num_movies > 0:
-            print_movies = True
             for idx, movie in enumerate(movies):
                 if idx % 10 == 0 and idx > 0:
                     choice = raw_input("Continue/Break").lower()

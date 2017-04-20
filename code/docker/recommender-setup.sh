@@ -1,7 +1,6 @@
 #!/bin/bash
 
-##TODO -> Parameterize -> cleanup repeats
-
+# TODO -> Parameterize -> cleanup repeats
 
 #Initializes the containers and the network
 ## Move the mysql run out of initialize
