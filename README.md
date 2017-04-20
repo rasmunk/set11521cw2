@@ -6,7 +6,8 @@ Docker build support, use the script in code/docker/recommender-system.sh to bui
   - A MySQL container which holds holds the data (movies, users, ratings)
   - A debian container that runs the recommendation system
   
-# TO RUN
+TO RUN:
+
 On the recommender-system
   - execute "SetupDatabase" to insert the MovieLens dataset into the database.
   - Run "RunRecommendationSystem" to start the recommender
