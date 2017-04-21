@@ -63,9 +63,6 @@ class TestRecommendations:
         movie_id = 1
         predicted_recommendations = recom.recoms
 
-        print("Predicted Recommendations: ")
-        # print(str(predicted_recommendations))
-
         print("Parsing recommendations")
         num_rows = len(predicted_recommendations)
         print("num recom " + str(num_rows))

@@ -43,7 +43,7 @@ RUN cd /opt \
 ## Setup the recommender system
 # Requires that there is a mysql database server running in the network
 RUN cd /opt \
-    && git clone -b development --single-branch https://github.com/rasmunk/set11521cw2.git \
+    && git clone -b master --single-branch https://github.com/rasmunk/set11521cw2.git \
     && cd /opt/set11521cw2/code/recommender-system \
     && python setup.py install \
     && rm -r /opt/set11521cw2

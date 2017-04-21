@@ -34,11 +34,6 @@ class UserService:
         return users
 
     @staticmethod
-    def get_most_active_users():
-        pass
-        # users = Database.session.query(User).filter(User.ratings)
-
-    @staticmethod
     def get_random_user():
         num_users = Database.session.query(func.count(User.id)).scalar()
         rand_user_id = randint(0, num_users - 1)
@@ -47,7 +42,6 @@ class UserService:
     @staticmethod
     def new_user():
         last_user_id = Database.session.query(func.max(User.userId)).scalar()
-        print("Last user id: " + str(last_user_id))
         new_user = User(userId=last_user_id + 1)
         try:
             Database.session.add(new_user)

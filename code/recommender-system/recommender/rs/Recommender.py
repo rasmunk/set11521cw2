@@ -113,7 +113,7 @@ class Recommender:
         movie_id = 1
         recommendations = []
         for user, recoms in self.recoms.iteritems():
-            # Persist 20 ratings for each user.
+            # Persist top 20 ratings for each user.
             amount_recoms = 0
             for item in recoms:
                 if Database.session.query(Recommendation).filter(Recommendation.user_id == user.id).filter(
