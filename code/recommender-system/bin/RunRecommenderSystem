@@ -19,11 +19,11 @@ args = parser.parse_args()
 if __name__ == "__main__":
     recommender.Database.initialize()
 
-    if args.test_recommendations is not True:
+    if not args.test_recommendations:
         system = recommender.RecommenderSystem()
-        if args.skip_recommendation is not True:
+        if not args.skip_recommendation:
             system.start_recommender()
-        if args.skip_menu is not True:
+        if not args.skip_menu:
             system.start_menu()
     else:
         tester = tests.TestRecommendations()
